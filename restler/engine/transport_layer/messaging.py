@@ -3,6 +3,8 @@
 
 """ Transport layer fuctionality using python sockets. """
 from __future__ import print_function
+
+import logging
 import ssl
 import socket
 import time
@@ -22,6 +24,15 @@ UTF8 = 'utf-8'
 
 
 class HttpSock(object):
+
+    def __init__(self):
+        self.logger = logging.getLogger('messaging')
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler("./messaging.log")
+        handler.setLevel(logging.DEBUG)
+        self.logger.addHandler(handler)
+        self.logger.warning("messaging init")
+
     __last_request_sent_time = time.time()
     __request_sem = threading.Semaphore()
 
@@ -198,6 +209,19 @@ class HttpSock(object):
 
         try:
             RAW_LOGGING(f'Sending: {message!r}\n')
+
+            import traceback
+            import engine
+
+            if not hasattr(self, "logger"):
+                self.logger = logging.getLogger('messaging')
+                self.logger.setLevel(logging.DEBUG)
+                handler = logging.FileHandler("./messaging.log")
+                handler.setLevel(logging.DEBUG)
+                self.logger.addHandler(handler)
+                self.logger.warning("messaging没有logger，现在创建")
+
+            self.logger.debug(f'底层发送请求: {message!r}\n')
             self._sock.sendall(message.encode(UTF8))
         except Exception as error:
             raise TransportLayerException(f"Exception Sending Data: {error!s}")

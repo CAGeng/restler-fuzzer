@@ -4,6 +4,7 @@
 """ Defines restler Sequences. """
 from __future__ import print_function
 
+import logging
 import sys
 import copy
 import time
@@ -562,6 +563,7 @@ class Sequence(object):
 
             req_async_wait = Settings().get_max_async_resource_creation_time(request.request_id)
 
+            # logging.debug("sending: " + rendered_data)
             response = request_utilities.send_request_data(rendered_data)
             if response.has_valid_code():
                 for name,v in updated_writer_variables.items():

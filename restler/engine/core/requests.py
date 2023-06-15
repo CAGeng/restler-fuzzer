@@ -317,6 +317,12 @@ class Request(object):
         """ Iterate over Request objects. """
         yield self
 
+    def __str__(self):
+        return "method: " + self.method + "\t"\
+               "endpoint: " + self.endpoint +\
+               "" \
+               ""
+
     def _set_hex_definitions(self, requestId):
         """ Helper that sets the various hex definition values
 

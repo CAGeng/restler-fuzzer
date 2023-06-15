@@ -6,6 +6,7 @@ import threading
 import engine.core.driver as driver
 import utils.logger as logger
 import traceback
+import logging
 
 from engine.core.fuzzing_monitor import Monitor
 from engine.core.requests import GrammarRequestCollection
@@ -14,6 +15,7 @@ from engine.errors import InvalidDictionaryException
 class FuzzingThread(threading.Thread):
     """ Fuzzer thread class
     """
+
     def __init__(self, fuzzing_requests, checkers, fuzzing_jobs=1, garbage_collector=None):
         """ Constructor for the Fuzzer thread class
 
@@ -32,6 +34,14 @@ class FuzzingThread(threading.Thread):
         self._num_total_sequences = 0
         self._exception = None
 
+        self.logger = logging.getLogger('fuzzer')
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler("./fuzzer.log")
+        handler.setLevel(logging.DEBUG)
+        self.logger.addHandler(handler)
+        self.logger.warning("haha test init")
+        # logging.basicConfig(filename='sft.log', level=logging.INFO)
+
     @property
     def exception(self):
         return self._exception
@@ -39,6 +49,15 @@ class FuzzingThread(threading.Thread):
     def run(self):
         """ Thread entrance - performs fuzzing
         """
+
+        #import pydevd_pycharm
+        #pydevd_pycharm.settrace('10.162.253.188', port=11000, stdoutToServer=True, stderrToServer=True)
+
+        self.logger.debug("fuzzer run")
+        # self.logger.debug("sss")
+        import engine
+        out_dir = engine.out_dir
+
         try:
             self._num_total_sequences = driver.generate_sequences(
                 self._fuzzing_requests, self._checkers, self._fuzzing_jobs,
