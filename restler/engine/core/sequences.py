@@ -508,6 +508,11 @@ class Sequence(object):
         datetime_format = "%Y-%m-%d %H:%M:%S"
         response_datetime_str = None
         timestamp_micro = None
+
+        # import pydevd_pycharm
+        # pydevd_pycharm.settrace('localhost', port=11000, stdoutToServer=True, stderrToServer=True)
+
+        # 从这里调用 requests.render_iter方法，迭代（yield）产生 rendered_data
         for rendered_data, parser, tracked_parameters, updated_writer_variables in\
                 request.render_iter(candidate_values_pool,
                                     skip=request._current_combination_id,

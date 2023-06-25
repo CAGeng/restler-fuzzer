@@ -374,6 +374,9 @@ if __name__ == '__main__':
             print(f"Failed to play sequence from log:\n{error!s}")
             sys.exit(-1)
 
+    # import pydevd_pycharm
+    # pydevd_pycharm.settrace('localhost', port=11000, stdoutToServer=True, stderrToServer=True)
+
     # Import grammar from a restler_grammar file
     if args.restler_grammar:
         try:
@@ -382,6 +385,19 @@ if __name__ == '__main__':
         except Exception as error:
             print(f"Cannot import grammar: {error!s}")
             sys.exit(-1)
+
+    # read swagger file
+    import engine.grammer_parser.swagger_parser as swagger_parser
+    settings.swagger_file_path = "/Users/fortsun/Desktop/git/1/restler-fuzzer/restler/sft/test-swagger.json"
+    swparser = swagger_parser.swagger_parser(settings.swagger_file_path).set_basic_req_collection(req_collection).parse()
+
+
+    # Set the grammar schema
+    for request_id in req_collection.request_id_collection.keys():
+        request = req_collection.request_id_collection[request_id]
+        for request_single in request:
+            print(request_single.endpoint)
+            request_single.historical = True
 
     # Create the request collection singleton
     requests.GlobalRequestCollection(req_collection)

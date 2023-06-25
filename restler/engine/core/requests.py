@@ -1087,6 +1087,8 @@ class Request(object):
             )
             raise InvalidDictionaryException
 
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=11000, stdoutToServer=True, stderrToServer=True)
 
         if not candidate_values_pool:
             print("Candidate values pool empty")
@@ -1112,9 +1114,15 @@ class Request(object):
             schema_idx += 1
             parser = None
             fuzzable_request_blocks = []
+
+            # 记录 historical data
+            historical_fuzzable_request_blocks = []
             for idx, request_block in enumerate(req.definition):
                 if primitives.CandidateValuesPool.is_custom_fuzzable(request_block[0]):
                     fuzzable_request_blocks.append(idx)
+                if 'historical' in request_block:
+                    historical_fuzzable_request_blocks.append(idx)
+
 
             # If request had post_send metadata, register parsers etc.
             if bool(self.metadata) and 'post_send' in self.metadata\
@@ -1183,6 +1191,11 @@ class Request(object):
                         values[idx] = val
 
                 values = request_utilities.resolve_dynamic_primitives(values, candidate_values_pool)
+
+                # 解决 historical 字段
+                for idx in fuzzable_request_blocks:
+                    if idx in historical_fuzzable_request_blocks:
+                        values[idx] = "historical_value_fuzzable"
 
                 # If all the value generators are done, and the combination pool is exhausted, exit
                 # the loop.  Note: this check must be made after resolving dynamic primitives,

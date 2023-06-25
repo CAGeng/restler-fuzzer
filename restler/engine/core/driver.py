@@ -222,14 +222,22 @@ def render_one(seq_to_render, ith, checkers, generation, global_lock, garbage_co
         # failures) -- that's why we put everything in a while.
         renderings = current_seq.render(candidate_values_pool, global_lock)
 
-        if renderings and renderings.sequence and renderings.sequence.requests:
-            dirver_logger.debug(split_line)
-            dirver_logger.debug("after '<renderings = current_seq.render(candidate_values_pool, global_lock)>' ")
-            dirver_logger.debug('发送请求序列：')
-            for request in renderings.sequence.requests:
-                dirver_logger.debug(str(request))
-            dirver_logger.debug('序列的最后一个响应：')
-            dirver_logger.debug(str(renderings.final_request_response.to_str))
+        # if renderings and renderings.sequence and renderings.sequence.requests:
+        #     dirver_logger.debug(split_line)
+        #     dirver_logger.debug("after '<renderings = current_seq.render(candidate_values_pool, global_lock)>' ")
+        #     dirver_logger.debug('发送请求序列：')
+        #     for request in renderings.sequence.requests:
+        #         dirver_logger.debug(str(request))
+        #     dirver_logger.debug('序列的最后一个响应状态：')
+        #     dirver_logger.debug(str(renderings.final_request_response.status_code))
+
+        if renderings and renderings.sequence and renderings.sequence.sent_request_data_list:
+            dirver_logger.debug(split_line + "render后发出的请求")
+            dirver_logger.debug(renderings.sequence.sent_request_data_list)
+            for sent_request_data in renderings.sequence.sent_request_data_list:
+                dirver_logger.debug(str(sent_request_data.rendered_data) + "\n")
+            dirver_logger.debug('序列的最后一个响应状态：')
+            dirver_logger.debug(str(renderings.final_request_response.status_code))
         # Note that this loop will keep running as long as we hit invalid
         # renderings and we will end up reapplying the leakage rule a billion
         # times for very similar 404s. To control this, when in bfs-cheap, we
