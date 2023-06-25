@@ -106,6 +106,12 @@ class Sequence(object):
 
         self._used_cached_prefix = False
 
+        self.logger = logging.getLogger('Sequence')
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler("./sequences.log")
+        handler.setLevel(logging.DEBUG)
+        self.logger.addHandler(handler)
+
     def __iter__(self):
         """ Iterate over Sequences objects. """
         return iter(self.requests)
@@ -509,8 +515,8 @@ class Sequence(object):
         response_datetime_str = None
         timestamp_micro = None
 
-        # import pydevd_pycharm
-        # pydevd_pycharm.settrace('localhost', port=11000, stdoutToServer=True, stderrToServer=True)
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=11000, stdoutToServer=True, stderrToServer=True)
 
         # 从这里调用 requests.render_iter方法，迭代（yield）产生 rendered_data
         for rendered_data, parser, tracked_parameters, updated_writer_variables in\
@@ -568,6 +574,7 @@ class Sequence(object):
 
             req_async_wait = Settings().get_max_async_resource_creation_time(request.request_id)
 
+            # 发送rendered_data
             # logging.debug("sending: " + rendered_data)
             response = request_utilities.send_request_data(rendered_data)
             if response.has_valid_code():
@@ -582,8 +589,11 @@ class Sequence(object):
                 parser_exception_occurred = not request_utilities.call_response_parser(parser, None, request=request, responses=responses_to_parse)
             status_code = response.status_code
 
+            # 添加到发送过的请求列表
             self.append_data_to_sent_list(rendered_data, parser, response, max_async_wait_time=req_async_wait)
             self.executed_requests_count = self.executed_requests_count + 1
+
+            self.record_historic_data(rendered_data, response)
 
             if not status_code:
                 duplicate = copy_self()
@@ -688,6 +698,33 @@ class Sequence(object):
                 rendered_data, parser, response.to_str, producer_timing_delay, max_async_wait_time
             )
         )
+
+    def record_historic_data(self, rendered_data, response):
+
+        def parse_datas(text):
+            # 提取引号里的数据值
+            import re
+
+            # 匹配双引号内的字符串
+            matches1 = re.findall(r'"([^"]*)"', text)
+            # 匹配单引号内的字符串
+            matches2 = re.findall(r"'([^']*)'", text)
+
+            datas = matches1 + matches2
+            # 去重
+            datas = list(set(datas))
+
+            datas_delete_too_long = []
+            for data in datas:
+                if len(data) <= 30:
+                    datas_delete_too_long.append(data)
+            return datas_delete_too_long
+
+        request_datas = parse_datas(rendered_data)
+        response_datas = parse_datas(response.json_body)
+        self.logger.debug("响应: " + str(response.json_body))
+        self.logger.debug("请求中的信息: " + str(request_datas))
+        self.logger.debug("响应中的信息: " + str(response_datas))
 
     def replace_last_sent_request_data(self, rendered_data, parser, response, producer_timing_delay=0, max_async_wait_time=0):
         """ Replaces the final sent request with new rendered data

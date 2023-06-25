@@ -233,7 +233,6 @@ def render_one(seq_to_render, ith, checkers, generation, global_lock, garbage_co
 
         if renderings and renderings.sequence and renderings.sequence.sent_request_data_list:
             dirver_logger.debug(split_line + "render后发出的请求")
-            dirver_logger.debug(renderings.sequence.sent_request_data_list)
             for sent_request_data in renderings.sequence.sent_request_data_list:
                 dirver_logger.debug(str(sent_request_data.rendered_data) + "\n")
             dirver_logger.debug('序列的最后一个响应状态：')
