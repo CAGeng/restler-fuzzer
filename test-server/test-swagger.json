@@ -1,0 +1,118 @@
+{
+  "openapi" : "3.0.2",
+  "info": {
+    "title" : "test-server",
+    "version" : "1.0"
+  },
+  "servers": [{
+        "url": "127.0.0.1:5000"
+  }],
+  "components": {
+    "schemas": {
+      "country_model": {
+        "title": "country_model",
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        }
+      },
+      "person_model": {
+        "title": "person_model",
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths" : {
+    "/api" : {
+      "get": {
+        "responses" : {}
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                  "$ref": "#/components/schemas/country_model"
+              },
+              "examples": {
+                "country1": {
+                  "summary": "A simple country document (1)",
+                  "description": "A **simple** Afghanistan document with only a few fields",
+                  "value": {
+                    "name": "China"
+                  }
+                },
+                "country2": {
+                  "summary": "A simple country document (2)",
+                  "description": "A **simple** Bahamas document with only a few fields",
+                  "value": {
+                    "name": "America"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {}
+      }
+    },
+    "/api/{country_name}" : {
+      "get" : {
+        "parameters": [{
+          "required": true,
+          "schema": {
+              "title": "country_name",
+              "type": "string"
+          },
+          "example": "China",
+          "name": "country_name",
+          "in" : "path"
+        }],
+        "responses" : {}
+      }
+
+    },
+    "/people" : {
+      "get": {
+        "responses": {}
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/person_model"
+              }
+            }
+          }
+        },
+        "responses": {}
+      }
+    },
+    "/search/{person_id}" : {
+      "get" : {
+        "parameters": [{
+          "required": true,
+          "schema": {
+            "title": "person_id",
+            "type": "string",
+            "historical" : true
+          },
+          "example": "sft",
+          "name": "person_id",
+          "in" : "path"
+        }],
+        "responses" : {}
+      }
+    }
+  }
+}
